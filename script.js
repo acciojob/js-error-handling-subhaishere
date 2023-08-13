@@ -1,94 +1,55 @@
-function evaluateExpression(expression) {
-  // Check for invalid characters
-  if (!/^[\d\s+\-/*]+$/.test(expression)) {
-    throw new OutOfRangeError(expression);
-  }
-
-
-
-
-//your code here
-
 class OutOfRangeError extends Error {
-  constructor(message) {
-    super(message);
+  constructor() {
+    super("Expression should only consist of integers and +-/* characters");
     this.name = this.constructor.name;
   }
 }
 
 class InvalidExprError extends Error {
-  constructor(message) {
-    super(message);
+  constructor() {
+    super("Expression should not have an invalid combination of operators");
     this.name = this.constructor.name;
   }
 }
 
 function evalString(expression) {
   try {
-    // Check for invalid combination of operators
-    if (
-      expression.includes("++") ||
-      expression.includes("+-") ||
-      expression.includes("-+") ||
-      expression.includes("--") ||
-      expression.includes("/*") ||
-      expression.includes("/+") ||
-      expression.includes("*/") ||
-      expression.includes("//-")
-    ) {
-      throw new InvalidExprError(
-        "Expression should not have an invalid combination of operators"
-      );
+    if (/[\+\-\*\/]{2,}/.test(expression)) {
+      throw new InvalidExprError();
     }
 
-    // Check for invalid starting operator
-    if (
-      expression.startsWith("+") ||
-      expression.startsWith("/") ||
-      expression.startsWith("*")
-    ) {
+    if (/^[\+\*\/].*/.test(expression)) {
       throw new SyntaxError("Expression should not start with an invalid operator");
     }
 
-    // Check for invalid ending operator
-    if (
-      expression.endsWith("+") ||
-      expression.endsWith("/") ||
-      expression.endsWith("*") ||
-      expression.endsWith("-")
-    ) {
+    if (/.*[\+\*\/\-]$/.test(expression)) {
       throw new SyntaxError("Expression should not end with an invalid operator");
     }
 
-    // Check for characters other than digits, operators, and spaces
-    const allowedChars = new Set("0123456789+-*/ ");
-    for (let i = 0; i < expression.length; i++) {
-      if (!allowedChars.has(expression[i])) {
-        throw new OutOfRangeError(
-          "Expression should only consist of integers and +-/* characters"
-        );
-      }
-    }
+    // Rest of the code to evaluate the expression goes here
+    // ...
 
-    // Evaluate the expression
-    const result = eval(expression);
-    return result;
+    return true; // Replace with the actual evaluation result
   } catch (error) {
-    if (error instanceof OutOfRangeError || error instanceof InvalidExprError) {
-      return `${error.name}: ${error.message}`;
-    } else if (error instanceof SyntaxError) {
-      return `Syntax Error: ${error.message}`;
+    if (error instanceof InvalidExprError || error instanceof SyntaxError) {
+      console.error(error.name + ": " + error.message);
     } else {
-      throw error;
+      throw error; // Re-throw the error if it's not one of the expected errors
     }
   }
 }
 
-// Test cases
+// Testing the evalString function
 try {
-  const expression = prompt().trim();
-  const result = evalString(expression);
-  console.log(result);
+  evalString("5 + 10"); // Valid expression
+  evalString("5 ++ 10"); // Invalid combination of operators
+  evalString("+5 + 10"); // Expression starting with an invalid operator
+  evalString("5 + 10 -"); // Expression ending with an invalid operator
+  evalString("5 + 10$"); // Expression with invalid character (OutOfRangeError)
 } catch (error) {
-  console.log("Error:", error);
+  if (error instanceof OutOfRangeError) {
+    console.error(error.name + ": " + error.message);
+  } else {
+    console.error("An unexpected error occurred:", error);
+  }
 }
