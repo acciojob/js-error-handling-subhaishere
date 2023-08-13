@@ -1,55 +1,40 @@
 class OutOfRangeError extends Error {
-  constructor() {
-    super("Expression should only consist of integers and +-/* characters");
-    this.name = this.constructor.name;
+  constructor(message) {
+    super(message);
+    this.name = 'OutOfRangeError';
   }
 }
 
 class InvalidExprError extends Error {
-  constructor() {
-    super("Expression should not have an invalid combination of operators");
-    this.name = this.constructor.name;
+  constructor(message) {
+    super(message);
+    this.name = 'InvalidExprError';
   }
 }
 
-function evalString(expression) {
+function evalString(expr) {
   try {
-    if (/[\+\-\*\/]{2,}/.test(expression)) {
-      throw new InvalidExprError();
+    // Check for invalid operator combinations
+    if (/\+\+|--|\+\-|-\+|\*\/|\/\*/.test(expr)) {
+      throw new InvalidExprError('Expression should not have an invalid combination of operators');
     }
 
-    if (/^[\+\*\/].*/.test(expression)) {
-      throw new SyntaxError("Expression should not start with an invalid operator");
+    // Check for invalid start and end operators
+    if (/^[+/*]/.test(expr)) {
+      throw new SyntaxError('Expression should not start with invalid operator');
+    }
+    if (/[\+\-*/]$/.test(expr)) {
+      throw new SyntaxError('Expression should not end with invalid operator');
     }
 
-    if (/.*[\+\*\/\-]$/.test(expression)) {
-      throw new SyntaxError("Expression should not end with an invalid operator");
+    // Check for valid expression format
+    if (!/^[-+*/\d\s()]+$/.test(expr)) {
+      throw new OutOfRangeError('Expression should only consist of integers and +-/* characters');
     }
 
-    // Rest of the code to evaluate the expression goes here
-    // ...
-
-    return true; // Replace with the actual evaluation result
+    // Evaluate the expression
+    return eval(expr);
   } catch (error) {
-    if (error instanceof InvalidExprError || error instanceof SyntaxError) {
-      console.error(error.name + ": " + error.message);
-    } else {
-      throw error; // Re-throw the error if it's not one of the expected errors
-    }
-  }
-}
-
-// Testing the evalString function
-try {
-  evalString("5 + 10"); // Valid expression
-  evalString("5 ++ 10"); // Invalid combination of operators
-  evalString("+5 + 10"); // Expression starting with an invalid operator
-  evalString("5 + 10 -"); // Expression ending with an invalid operator
-  evalString("5 + 10$"); // Expression with invalid character (OutOfRangeError)
-} catch (error) {
-  if (error instanceof OutOfRangeError) {
-    console.error(error.name + ": " + error.message);
-  } else {
-    console.error("An unexpected error occurred:", error);
+    throw error;
   }
 }
